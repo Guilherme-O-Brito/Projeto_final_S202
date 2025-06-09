@@ -23,19 +23,22 @@
           <mxGeometry y="146" width="140" height="26" as="geometry" />
         </mxCell>
         <mxCell id="FdY34BbTGLnVHsPEEQUI-6" value="Produto" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=26;fillColor=none;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
-          <mxGeometry x="344" y="90" width="140" height="140" as="geometry" />
+          <mxGeometry x="344" y="90" width="140" height="166" as="geometry" />
         </mxCell>
-        <mxCell id="FdY34BbTGLnVHsPEEQUI-7" value="+ nome: string" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="FdY34BbTGLnVHsPEEQUI-6">
+        <mxCell id="FdY34BbTGLnVHsPEEQUI-22" value="+ id: int" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="FdY34BbTGLnVHsPEEQUI-6">
           <mxGeometry y="26" width="140" height="26" as="geometry" />
         </mxCell>
-        <mxCell id="FdY34BbTGLnVHsPEEQUI-8" value="+ descricao: string" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="FdY34BbTGLnVHsPEEQUI-6">
+        <mxCell id="FdY34BbTGLnVHsPEEQUI-7" value="+ nome: string" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="FdY34BbTGLnVHsPEEQUI-6">
           <mxGeometry y="52" width="140" height="26" as="geometry" />
         </mxCell>
-        <mxCell id="FdY34BbTGLnVHsPEEQUI-9" value="+ preco: float" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="FdY34BbTGLnVHsPEEQUI-6">
+        <mxCell id="FdY34BbTGLnVHsPEEQUI-8" value="+ descricao: string" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="FdY34BbTGLnVHsPEEQUI-6">
           <mxGeometry y="78" width="140" height="26" as="geometry" />
         </mxCell>
+        <mxCell id="FdY34BbTGLnVHsPEEQUI-9" value="+ preco: float" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="FdY34BbTGLnVHsPEEQUI-6">
+          <mxGeometry y="104" width="140" height="26" as="geometry" />
+        </mxCell>
         <mxCell id="FdY34BbTGLnVHsPEEQUI-12" value="+ nota_de_avalicacao: int" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="FdY34BbTGLnVHsPEEQUI-6">
-          <mxGeometry y="104" width="140" height="36" as="geometry" />
+          <mxGeometry y="130" width="140" height="36" as="geometry" />
         </mxCell>
         <mxCell id="FdY34BbTGLnVHsPEEQUI-13" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endArrow=none;startFill=0;" edge="1" parent="1" source="FdY34BbTGLnVHsPEEQUI-3" target="FdY34BbTGLnVHsPEEQUI-8">
           <mxGeometry relative="1" as="geometry" />
