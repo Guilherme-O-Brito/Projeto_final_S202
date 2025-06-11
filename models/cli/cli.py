@@ -34,7 +34,7 @@ class StoreCLI(SimpleCLI):
         #self.add_command('login usuario', self.login_usuario)
         self.add_command('cadastrar usuario', self.cadastrar_usuario) # create
         self.add_command('listar usuarios', self.listar_usuarios) # read
-        #self.add_command('alterar usuario', self.update_usuario) # update
+        self.add_command('alterar usuario', self.update_usuario) # update
         self.add_command('excluir usuario', self.delete_usuario) # delete
         '''
             a função login devera requisitar ao usuario o email do vendedor
@@ -48,10 +48,13 @@ class StoreCLI(SimpleCLI):
         #self.add_command('excluir vendedor', self.delete_usuario) # delete
 
     def cadastrar_usuario(self):
-        novo_usuario = Usuario(
-            nome=input('Digite o nome do novo usuario: '),
-            email=input('Digite o email do novo usuario (este sera usado para diferenciar os usuarios): '),
-        )
+        nome = input('Digite o nome do novo usuario: ')
+        email = input('Digite o email do novo usuario (este sera usado para diferenciar os usuarios): ')
+        if self.usuarioDAO.check_email(email):
+            print('Email ja cadastrado em outro usuario')
+            return
+
+        novo_usuario = Usuario(nome, email)
 
         self.usuarioDAO.create_usuario(novo_usuario)
         print('Usuario criado com sucesso!')
@@ -62,8 +65,21 @@ class StoreCLI(SimpleCLI):
         for usuario in usuarios:
             print(usuario)
 
+    def update_usuario(self):
+        original_email = input('Entre com o email do usuario a ser alterado: ')
+        if not self.usuarioDAO.check_email(original_email):
+            print('Email não encontrado ou não cadastrado')
+            return
+        novo_nome = input('Digite o novo nome do usuario (caso não queira alterar apenas aperte ENTER):')
+        novo_email = input('Digite o novo email do usuario (caso não queira alterar apenas aperte ENTER):')
+        self.usuarioDAO.alterar_usuario(original_email, novo_nome, novo_email)
+        
+
     def delete_usuario(self):
-        self.usuarioDAO.delete_usuario(input('Digite o email do usuario que sera removido: '))
+        email = input('Digite o email do usuario que sera removido: ')
+        self.usuarioDAO.delete_usuario(email)
+        if not self.usuarioDAO.check_email(email):
+            print('Email não encontrado ou não cadastrado')
     
     
     '''

@@ -36,16 +36,32 @@ class UsuarioDAO:
             print(e)
             return None
     
-    def alterar_usuario(self):
-        pass
-
+    def alterar_usuario(self, email:str, novo_nome:str, novo_email:str):
+        usuario = self.db.collection.find_one({'email':email})
+        self.db.collection.update_one(
+                {'email':email}, 
+                {'$set':
+                    {
+                        'nome':novo_nome if novo_nome != '' else usuario['nome'], 
+                        'email':novo_email if novo_email != '' else usuario['email']
+                    }
+                }
+            )
+        print('Usuario alterado com sucesso!')
     def delete_usuario(self, email:str):
         try:
             res = self.db.collection.delete_one({'email':email})
-            if res.deleted_count == 1:
-                print('Usuario excluido com sucesso!')
-            else:
-                print('Falha ao excluir o usuario, considere conferir o email inserido.')
+            print('Usuario excluido com sucesso!')
         except Exception as e:
             print(e)
             return None
+        
+    def check_email(self, email:str) -> bool:
+        try:
+            res = self.db.collection.find_one({'email':email})
+            if res == None:
+                return False
+            return True
+        except Exception as e:
+            print(e)
+            return False
