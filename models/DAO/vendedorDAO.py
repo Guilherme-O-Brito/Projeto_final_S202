@@ -1,55 +1,57 @@
-from models.DAO.usuario import Usuario
+from models.DAO.vendedor import Vendedor
 from models.DAO.produto import Produto
 from db.database import Database
 
-class UsuarioDAO:
+class VendedorDAO:
     def __init__(self, database:Database):
         self.db = database
 
-    def create_usuario(self, usuario:Usuario):
+    def create_vendedor(self, vendedor:Vendedor):
         try:
-            res = self.db.collection.insert_one(usuario.to_dict())
+            res = self.db.collection.insert_one(vendedor.to_dict())
             return res
         except Exception as e:
             print(e)
             return None
-        
-    def listar_usuarios(self):
+    
+    def listar_vendedores(self):
         try:
-            usuarios = []
+            vendedores = []
             responses = self.db.collection.find()
 
             for res in responses:
-                compras = []
-                for produto in res['compras']:
-                    compras.append(Produto(
+                produtos = []
+                for produto in res['produtos']:
+                    produtos.append(Produto(
                         id=produto['id'],
                         nome=produto['nome'],
                         descricao=produto['descricao'],
                         preco=produto['preco'],
                         nota_de_avaliacao=produto['nota_de_avaliacao']
                     ))
-                usuarios.append(Usuario(res['nome'], res['email'], compras))
+                vendedores.append(Vendedor(res['nome'], res['email'], res['descricao'], res['pais_de_origem'], produtos))
 
-            return usuarios
+            return vendedores
         except Exception as e:
             print(e)
             return None
     
-    def alterar_usuario(self, email:str, novo_nome:str, novo_email:str):
-        usuario = self.db.collection.find_one({'email':email})
+    def alterar_vendedor(self, email:str, novo_nome:str, novo_email:str, nova_descricao:str, novo_pais_de_origem:str):
+        vendedor = self.db.collection.find_one({'email':email})
         self.db.collection.update_one(
                 {'email':email}, 
                 {'$set':
                     {
-                        'nome':novo_nome if novo_nome != '' else usuario['nome'], 
-                        'email':novo_email if novo_email != '' else usuario['email']
+                        'nome':novo_nome if novo_nome != '' else vendedor['nome'], 
+                        'email':novo_email if novo_email != '' else vendedor['email'],
+                        'descricao':nova_descricao if nova_descricao != '' else vendedor['descricao'],
+                        'pais_de_origem':novo_pais_de_origem if novo_pais_de_origem != '' else vendedor['pais_de_origem'],
                     }
                 }
             )
-        print('Usuario alterado com sucesso!')
+        print('Vendedor alterado com sucesso!')
 
-    def delete_usuario(self, email:str):
+    def delete_vendedor(self, email:str):
         try:
             self.db.collection.delete_one({'email':email})
         except Exception as e:
@@ -65,3 +67,5 @@ class UsuarioDAO:
         except Exception as e:
             print(e)
             return False
+        
+    
