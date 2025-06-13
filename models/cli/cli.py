@@ -168,8 +168,9 @@ class UserCLI(SimpleCLI):
         print(f'Desconectando de {self.usuario}')
 
     def buscar_produto(self):
+        id_vendedor= input("Digite o id do vendedor: ")
         key_word = input('Digite o nome ou palavra que deseja buscar: ')
-        vendedores = self.vendedorDAO.buscar_produto(key_word)
+        vendedores = self.vendedorDAO.buscar_produto(key_word,id_vendedor)
         print('Produtos encontrados: ')
         for vendedor, produtos in vendedores.items():
             for produto in produtos:
@@ -183,13 +184,19 @@ class UserCLI(SimpleCLI):
             print(produto)
         
     def comprar_produto(self):
-        produto = self.vendedorDAO.buscar_produto_por_id(int(input('Digite o id do produto que deseja comprar: ')))
-
-        if produto == None:
+        vendedor = input("Coloque o Id do vendedor")
+        produto = int(input('Digite o id do produto que deseja comprar: '))
+        vrfc = self.vendedorDAO.buscar_produto_por_id(produto,vendedor)
+        if vrfc == None:
             print('Produto não encontrado')
-            return 
+            return
+        else:
+            print("Produto encontrado")
+         
+        qnt = int(input('Quantas unidades deseja comprar: '))
+        self.vendedorDAO.alterar_Qnt_Por_compra(vendedor, produto, qnt)
 
-        if self.usuarioDAO.registrar_compra(produto, self.usuario):
+        if self.usuarioDAO.registrar_compra(vrfc, self.usuario,qnt):
             print('Compra registrada com sucesso!')
         else:
             print('Não foi possivel realizar a compra')
@@ -227,7 +234,8 @@ class SellerCLI(SimpleCLI):
             nome=input('Insira o nome do produto: '),
             descricao=input('Insira a descrição do produto: '),
             preco=float(input('Insira o preço do produto: ')),
-            nota_de_avaliacao=int(input('Insira a nota de valiação (apenas inteiros):'))
+            nota_de_avaliacao=int(input('Insira a nota de valiação (apenas inteiros):')),
+            qnt = int(input("Coloque a quantidade do produto(apenas inteiros): "))
         )
 
         if produto.preco > 10:
@@ -244,8 +252,9 @@ class SellerCLI(SimpleCLI):
         nova_descricao = input('Digite a nova descrição do produto (caso não queira alterar apenas aperte ENTER): ')
         novo_preco = input('Digite o novo preço do produto (caso não queira alterar apenas aperte ENTER): ')
         nova_nota = input('Digite a nova nota do produto (caso não queira alterar apenas aperte ENTER):')
+        nova_qnt = input("Digite a nova quantidade do produto (caso não queira alterar apenas aperte ENTER):")
         
-        if self.vendedorDAO.alterar_produto(id, novo_nome, nova_descricao, novo_preco, nova_nota, self.vendedor):
+        if self.vendedorDAO.alterar_produto(id, novo_nome, nova_descricao, novo_preco, nova_nota,nova_qnt, self.vendedor):
             print('Produto alterado com sucesso!')
         else:
             print('Não foi possivel alterar o produto!')

@@ -1,6 +1,7 @@
 from models.DAO.vendedor import Vendedor
 from models.DAO.produto import Produto
 from db.database import Database
+from bson.objectid import ObjectId
 
 class VendedorDAO:
     def __init__(self, database:Database):
@@ -27,7 +28,8 @@ class VendedorDAO:
                         nome=produto['nome'],
                         descricao=produto['descricao'],
                         preco=produto['preco'],
-                        nota_de_avaliacao=produto['nota_de_avaliacao']
+                        nota_de_avaliacao=produto['nota_de_avaliacao'],
+                        quantidade = produto['quantidade']
                     ))
                 vendedores.append(Vendedor(res['nome'], res['email'], res['descricao'], res['pais_de_origem'], produtos))
 
@@ -84,7 +86,8 @@ class VendedorDAO:
                     nome=produto['nome'],
                     descricao=produto['descricao'],
                     preco=produto['preco'],
-                    nota_de_avaliacao=produto['nota_de_avaliacao']
+                    nota_de_avaliacao=produto['nota_de_avaliacao'],
+                    quantidade= produto['quantidade']
                 ))
             return Vendedor(
                 nome=seller['nome'],
@@ -97,13 +100,13 @@ class VendedorDAO:
             print(e)
             return False
         
-    def buscar_produto(self, keyword:str):
+    def buscar_produto(self, keyword:str, vendedor_id:str):
         try:
             responses = self.db.collection.aggregate([
                 # explode o vetor de produtos no documento de vendedores
                 {'$unwind':'$produtos'},
                 # procura pela keyword no nome dos produtos e encontra o ou os que possuem essa palavra
-                {'$match': {
+                {'$match': {'_id': ObjectId(vendedor_id),
                     'produtos.nome': {'$regex': keyword, '$options':'i'}
                 }},
                 # agrupa os produtos separados por seu respectivo vendedor
@@ -126,7 +129,8 @@ class VendedorDAO:
                             produto['nome'],
                             produto['descricao'],
                             produto['preco'],
-                            produto['nota_de_avaliacao']
+                            produto['nota_de_avaliacao'],
+                            produto['quantidade']
                         ) 
                     )
                 vendedores[seller['_id']] = produtos.copy()
@@ -155,7 +159,8 @@ class VendedorDAO:
                             produto['nome'],
                             produto['descricao'],
                             produto['preco'],
-                            produto['nota_de_avaliacao']
+                            produto['nota_de_avaliacao'],
+                            produto['quantidade']
                         ) 
                     )
 
@@ -165,9 +170,9 @@ class VendedorDAO:
             print(e)
             return None
     
-    def buscar_produto_por_id(self, id:int):
+    def buscar_produto_por_id(self, id:int, vendedor_id:str):
         try:
-            produto = self.db.collection.find_one({'produtos.id': id},{'produtos.$': 1})
+            produto = self.db.collection.find_one({'_id': ObjectId(vendedor_id),'produtos.id': id},{'produtos.$': 1})
             if produto != None:
                 produto = produto['produtos'][0] 
                 return Produto(
@@ -175,7 +180,8 @@ class VendedorDAO:
                     produto['nome'],
                     produto['descricao'],
                     produto['preco'],
-                    produto['nota_de_avaliacao']
+                    produto['nota_de_avaliacao'],
+                    produto['quantidade']
                 )
             return produto
         
@@ -241,7 +247,34 @@ class VendedorDAO:
             print(e)
             return False
     
-    def alterar_produto(self, id:int, novo_nome:str, nova_descricao:str, novo_preco:str, nova_nota:str, vendedor:Vendedor):
+    def alterar_Qnt_Por_compra(self,vendedor_id:str, id:str, qnt:int):
+        try:
+            res = self.db.collection.find_one(
+            {
+            "_id": ObjectId(vendedor_id),
+            "produtos.id": id
+            },
+            {
+            "produtos.$": 1  # retorna só o produto correspondente
+            })
+            quantidade_atual = res["produtos"][0]["quantidade"]
+        
+            if quantidade_atual is not None and quantidade_atual > 0:
+                self.db.collection.update_one(
+                {
+                    "_id": ObjectId(vendedor_id),
+                    "produtos.id": id
+                },
+                {
+                    "$inc": {"produtos.$.quantidade": -qnt}
+                }
+            )
+            print("Quantidade atualizada com sucesso!")
+        except Exception as e:
+            print(f"Deu pra compra não chefia, deu erro{e}")
+            return None
+
+    def alterar_produto(self, id:int, novo_nome:str, nova_descricao:str, novo_preco:str, nova_nota:str, nova_qnt:str, vendedor:Vendedor):
         try:
             produto = self.db.collection.find_one({'produtos.id': id},{'produtos.$': 1})
             if produto == None:
@@ -257,7 +290,8 @@ class VendedorDAO:
                         'produtos.$.nome': novo_nome if novo_nome != '' else produto['nome'],
                         'produtos.$.descricao': nova_descricao if nova_descricao != '' else produto['descricao'],
                         'produtos.$.preco': float(novo_preco) if novo_preco != '' else produto['preco'],
-                        'produtos.$.nota_de_avaliacao': int(nova_nota) if nova_nota != '' else produto['nota_de_avaliacao']
+                        'produtos.$.nota_de_avaliacao': int(nova_nota) if nova_nota != '' else produto['nota_de_avaliacao'],
+                        'produtos.$.quantidade':int(nova_qnt) if nova_qnt != '' else produto['quantidade']
                     }
                 }
             )

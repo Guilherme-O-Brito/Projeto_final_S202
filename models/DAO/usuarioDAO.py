@@ -1,5 +1,6 @@
 from models.DAO.usuario import Usuario
 from models.DAO.produto import Produto
+from models.DAO.vendedor import Vendedor
 from db.database import Database
 
 class UsuarioDAO:
@@ -27,7 +28,8 @@ class UsuarioDAO:
                         nome=produto['nome'],
                         descricao=produto['descricao'],
                         preco=produto['preco'],
-                        nota_de_avaliacao=produto['nota_de_avaliacao']
+                        nota_de_avaliacao=produto['nota_de_avaliacao'],
+                        quantidade = produto['quantidade']
                     ))
                 usuarios.append(Usuario(res['nome'], res['email'], compras))
 
@@ -78,7 +80,8 @@ class UsuarioDAO:
                 nome=produto['nome'],
                 descricao=produto['descricao'],
                 preco=produto['preco'],
-                nota_de_avaliacao=produto['nota_de_avaliacao']
+                nota_de_avaliacao=produto['nota_de_avaliacao'],
+                quantidade = produto['quantidade']
             ))
         return Usuario(
             nome=user['nome'],
@@ -86,10 +89,10 @@ class UsuarioDAO:
             compras=compras
         )
     
-    def registrar_compra(self, produto:Produto, usuario:Usuario):
+    def registrar_compra(self, produto:Produto, usuario:Usuario,quantidade):
         res = self.db.collection.update_one(
             {'email':usuario.email}, 
-            {'$push': {'compras':produto.to_dict()}}
+            {'$push': {'compras':produto.to_dict_compra(qnt=quantidade)}}
         )
 
         if res.matched_count == 0:
@@ -117,7 +120,8 @@ class UsuarioDAO:
                     nome=produto['nome'],
                     descricao=produto['descricao'],
                     preco=produto['preco'],
-                    nota_de_avaliacao=produto['nota_de_avaliacao']
+                    nota_de_avaliacao=produto['nota_de_avaliacao'],
+                    quantidade = produto['quantidade']
                 ))
 
             return compras
