@@ -11,14 +11,14 @@ class SimpleCLI:
 
     def run(self):
         while True:
-            command = input("Entre com um comando: ")
-            if command == "quit":
-                print("Encerrando!")
+            command = input("Coloque o q se quer:  ")
+            if command == "sair":
+                print("Obrigado, o Baratão do Triginho está sempre ao nosso dispor")
                 break
             elif command in self.commands:
                 self.commands[command]()
             else:
-                print("Comando Invalido!")
+                print("Escreveu errado, escreve certo agora")
 
 class StoreCLI(SimpleCLI):
     def __init__(self, vendedorDAO:VendedorDAO, usuarioDAO:UsuarioDAO):
@@ -161,7 +161,9 @@ class UserCLI(SimpleCLI):
     
     def run(self):
         print(f'Conectado como: {self.usuario} ao sistema de Usuarios')
-        print('Caso queira sair deste usuario digite "quit"')
+        print("Seja Bem vindo a Loja Baratão do Triginho")
+        print("O que deseja fazer aqui gurí?")
+        print('Caso queira sair deste usuario digite "sair"')
         super().run()
         print(f'Desconectando de {self.usuario}')
 
@@ -213,7 +215,9 @@ class SellerCLI(SimpleCLI):
     
     def run(self):
         print(f'Conectado como: {self.vendedor} ao sistema de Vendedores')
-        print('Caso queira sair deste vendedor digite "quit"')
+        print("Seja Bem vindo a Loja Baratão do Triginho")
+        print("O que deseja fazer aqui gurí?")
+        print('Caso queira sair deste vendedor digite "sair"')
         super().run()
         print(f'Desconectando de {self.vendedor}')
 
@@ -225,6 +229,9 @@ class SellerCLI(SimpleCLI):
             preco=float(input('Insira o preço do produto: ')),
             nota_de_avaliacao=int(input('Insira a nota de valiação (apenas inteiros):'))
         )
+
+        if produto.preco > 10:
+            print("Tá caro ein")
 
         if self.vendedorDAO.cadastrar_produto(produto, self.vendedor):
             print('Produto cadastrado com sucesso!')
