@@ -7,7 +7,7 @@ class Vendedor:
         self.produtos = produtos
     
     def __str__(self):
-        return f'Vendedor: {self.nome} do {self.pais_de_origem} email: {self.email}'
+        return f'Vendedor: \n{self.nome} do {self.pais_de_origem} email: {self.email} \n {self.descricao}'
     
     # retorna um dicionario representando o usuario
     def to_dict(self) -> dict:

@@ -37,19 +37,22 @@ class VendedorDAO:
             return None
     
     def alterar_vendedor(self, email:str, novo_nome:str, novo_email:str, nova_descricao:str, novo_pais_de_origem:str):
-        vendedor = self.db.collection.find_one({'email':email})
-        self.db.collection.update_one(
-                {'email':email}, 
-                {'$set':
-                    {
-                        'nome':novo_nome if novo_nome != '' else vendedor['nome'], 
-                        'email':novo_email if novo_email != '' else vendedor['email'],
-                        'descricao':nova_descricao if nova_descricao != '' else vendedor['descricao'],
-                        'pais_de_origem':novo_pais_de_origem if novo_pais_de_origem != '' else vendedor['pais_de_origem'],
+        try:
+            vendedor = self.db.collection.find_one({'email':email})
+            self.db.collection.update_one(
+                    {'email':email}, 
+                    {'$set':
+                        {
+                            'nome':novo_nome if novo_nome != '' else vendedor['nome'], 
+                            'email':novo_email if novo_email != '' else vendedor['email'],
+                            'descricao':nova_descricao if nova_descricao != '' else vendedor['descricao'],
+                            'pais_de_origem':novo_pais_de_origem if novo_pais_de_origem != '' else vendedor['pais_de_origem'],
+                        }
                     }
-                }
-            )
-        print('Vendedor alterado com sucesso!')
+                )
+        
+        except Exception as e:
+            print(e)
 
     def delete_vendedor(self, email:str):
         try:
@@ -68,4 +71,216 @@ class VendedorDAO:
             print(e)
             return False
         
+    # retorna o objeto do vendedor correspondente ao email inserido
+    def get_seller_by_email(self, email:str):
+        try:
+            if not self.check_email(email):
+                return False
+            seller = self.db.collection.find_one({'email':email})
+            produtos = []
+            for produto in seller['produtos']:
+                produtos.append(Produto(
+                    id=produto['id'],
+                    nome=produto['nome'],
+                    descricao=produto['descricao'],
+                    preco=produto['preco'],
+                    nota_de_avaliacao=produto['nota_de_avaliacao']
+                ))
+            return Vendedor(
+                nome=seller['nome'],
+                email=seller['email'],
+                descricao=seller['descricao'],
+                pais_de_origem=seller['pais_de_origem'],
+                produtos=produtos
+            )
+        except Exception as e:
+            print(e)
+            return False
+        
+    def buscar_produto(self, keyword:str):
+        try:
+            responses = self.db.collection.aggregate([
+                # explode o vetor de produtos no documento de vendedores
+                {'$unwind':'$produtos'},
+                # procura pela keyword no nome dos produtos e encontra o ou os que possuem essa palavra
+                {'$match': {
+                    'produtos.nome': {'$regex': keyword, '$options':'i'}
+                }},
+                # agrupa os produtos separados por seu respectivo vendedor
+                {
+                    '$group': {
+                        '_id':'$nome',
+                        'produtos':{'$push':'$produtos'}
+                    }
+                },
+                
+            ])
+            
+            vendedores = {}
+            for seller in responses:
+                produtos = []
+                for produto in seller['produtos']:
+                    produtos.append(
+                        Produto(
+                            produto['id'],
+                            produto['nome'],
+                            produto['descricao'],
+                            produto['preco'],
+                            produto['nota_de_avaliacao']
+                        ) 
+                    )
+                vendedores[seller['_id']] = produtos.copy()
+            
+            return vendedores
+                
+        except Exception as e:
+            print(e)
+            return None
+        
+    def melhores_produtos(self):
+        try:
+            responses = self.db.collection.aggregate([
+                # explode o vetor de produtos no documento de vendedores
+                {'$unwind':'$produtos'},
+                # transforma os documentos dentro da lista produtos na raiz
+                {'$replaceRoot': {'newRoot':'$produtos'}},
+                # organiza os produtos por nota de avaliação
+                {'$sort': {'nota_de_avaliacao':-1}}
+            ])
+            produtos = []
+            for produto in responses:
+                produtos.append(
+                        Produto(
+                            produto['id'],
+                            produto['nome'],
+                            produto['descricao'],
+                            produto['preco'],
+                            produto['nota_de_avaliacao']
+                        ) 
+                    )
+
+            return produtos
+
+        except Exception as e:
+            print(e)
+            return None
     
+    def buscar_produto_por_id(self, id:int):
+        try:
+            produto = self.db.collection.find_one({'produtos.id': id},{'produtos.$': 1})
+            if produto != None:
+                produto = produto['produtos'][0] 
+                return Produto(
+                    produto['id'],
+                    produto['nome'],
+                    produto['descricao'],
+                    produto['preco'],
+                    produto['nota_de_avaliacao']
+                )
+            return produto
+        
+        except Exception as e:
+            print(e)
+            return None
+        
+    def listar_produtos(self, vendedor:Vendedor):
+        try: 
+            responses = self.db.collection.aggregate([
+                # filtra pelo vendedor logado
+                {'$match': {'email':vendedor.email}},
+                # explode o vetor de produtos no documento de usuarios
+                {'$unwind':'$produtos'},
+                # transforma os documentos dentro da lista produtos na raiz
+                {'$replaceRoot': {'newRoot':'$produtos'}},
+                # organiza os produtos por id
+                {'$sort': {'id':1}}
+            ])
+            
+            produtos = []
+            for produto in responses:
+                produtos.append(Produto(
+                    id=produto['id'],
+                    nome=produto['nome'],
+                    descricao=produto['descricao'],
+                    preco=produto['preco'],
+                    nota_de_avaliacao=produto['nota_de_avaliacao']
+                ))
+
+            return produtos
+
+        except Exception as e:
+            print(e)
+            return None
+    
+    # retorna o proximo id disponivel para cadastro de produtos
+    def get_next_id(self):
+        max_id = list(self.db.collection.aggregate([
+            {'$unwind':'$produtos'},
+            {'$group': {
+                '_id': None,
+                'id': {'$max':'$produtos.id'}
+            }}
+        ]))
+        
+        maior_id = int(max_id[0]['id']) + 1 if max_id else 0
+
+        return maior_id
+    
+    def cadastrar_produto(self, produto:Produto, vendedor:Vendedor):
+        try: 
+            res = self.db.collection.update_one(
+                {'email':vendedor.email}, 
+                {'$push': {'produtos':produto.to_dict()}}
+            )
+
+            if res.modified_count == 0:
+                return False
+
+            return True
+        except Exception as e:
+            print(e)
+            return False
+    
+    def alterar_produto(self, id:int, novo_nome:str, nova_descricao:str, novo_preco:str, nova_nota:str, vendedor:Vendedor):
+        try:
+            produto = self.db.collection.find_one({'produtos.id': id},{'produtos.$': 1})
+            if produto == None:
+                return False
+            produto = produto['produtos'][0]
+            res = self.db.collection.update_one(
+                {
+                    'email':vendedor.email,
+                    'produtos.id':id
+                },
+                {
+                    '$set': {
+                        'produtos.$.nome': novo_nome if novo_nome != '' else produto['nome'],
+                        'produtos.$.descricao': nova_descricao if nova_descricao != '' else produto['descricao'],
+                        'produtos.$.preco': float(novo_preco) if novo_preco != '' else produto['preco'],
+                        'produtos.$.nota_de_avaliacao': int(nova_nota) if nova_nota != '' else produto['nota_de_avaliacao']
+                    }
+                }
+            )
+
+            if res.modified_count == 0:
+                return False
+
+            return True
+        except Exception as e:
+            print(e)
+            return False
+
+    def excluir_produto(self, id:int, vendedor:Vendedor):
+        try:
+            res = self.db.collection.update_one(
+                {'email':vendedor.email},
+                {'$pull': {'produtos':{'id':id}}}
+            )
+
+            if res.modified_count == 0:
+                return False
+
+            return True
+        except Exception as e:
+            print(e)
+            return False

@@ -10,12 +10,12 @@ class Produto:
 
     def __str__(self):
         return f'''
-            Produto: \n
-            id: {self.id}\n
-            nome: {self.nome}\n 
-            descrição: {self.descricao}\n 
-            preço: {self.preco}\n 
-            nota de avaliação: {self.nota_de_avaliacao}\n
+            Produto: 
+            id: {self.id}
+            nome: {self.nome}
+            descrição: {self.descricao}
+            preço: {self.preco}
+            nota de avaliação: {self.nota_de_avaliacao}
         '''
         
     # retorna um dicionario representando o produto

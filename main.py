@@ -4,7 +4,9 @@ from models.DAO.vendedorDAO import VendedorDAO
 from models.cli.cli import StoreCLI
 
 if __name__ == '__main__':
+    # Conexão a collection de usuarios
     user_db = Database(database='Projeto_final', collection='Users')
+    # Conexão a collection de vendedores
     seller_db = Database(database='Projeto_final', collection='Sellers')
 
     usuarioDAO = UsuarioDAO(user_db)
